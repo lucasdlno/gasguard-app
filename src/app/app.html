@@ -14,10 +14,8 @@
     </div>
 
     <button class="btn-login" (click)="fazerLogin()">Entrar no Sistema</button>
-    <p class="mock-warning"><small>*Modo Demonstração: Qualquer credencial é aceita</small></p>
   </div>
 </div>
-
 
 <div *ngIf="isLoggedIn" class="dashboard-container">
   <div class="header-bar">
@@ -44,14 +42,6 @@
       ⚠️ ALERTA DE VAZAMENTO! ⚠️<br>
       Não acenda luzes. Abra as janelas. Evacue o local imediatamente.
       <br><small>(Válvula solenoide bloqueada com sucesso)</small>
-    </div>
-  </div>
-
-  <div class="presentation-controls">
-    <p>Painel de Simulação (Uso interno):</p>
-    <div class="button-group">
-      <button (click)="simulateLeak()" class="btn-leak">Forçar Vazamento</button>
-      <button (click)="resetSystem()" class="btn-reset">Normalizar</button>
     </div>
   </div>
 </div>

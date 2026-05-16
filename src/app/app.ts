@@ -1,5 +1,6 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -8,44 +9,61 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
-export class App implements OnDestroy {
-  // --- CONTROLE DE TELA ---
-  isLoggedIn = false; // O aplicativo sempre começa na tela de Login
+export class App implements OnInit, OnDestroy {
+  // --- CONTROLO DE ECRÃ ---
+  isLoggedIn = false;
 
   // --- DADOS DO DASHBOARD ---
-  sensorData = {
-    device_name: 'Cozinha - Apartamento 42',
-    gas_level_percentage: 0.2, 
-    status: 'Seguro'
+  // Começa com valores a zero até o Python enviar os dados reais
+  sensorData: any = { 
+    device_name: 'A carregar...', 
+    gas_level_percentage: 0, 
+    status: 'Seguro' 
   };
   intervalId: any;
 
+  constructor(private http: HttpClient) {}
+
+  // ==========================================
+  // CORREÇÃO: O ngOnInit que o Angular estava exigindo
+  // ==========================================
+  ngOnInit() {
+    // Podemos deixar vazio, pois a nossa leitura só começa ao fazer Login.
+  }
+
   // --- LÓGICA DE LOGIN ---
   fazerLogin() {
-    // -------------------------------------------------------------
-    // FUTURO: É AQUI QUE O CÓDIGO "PARA VALER" VAI ENTRAR.
-    // Você fará uma chamada http.post() para a sua API Python 
-    // enviando o usuário e a senha para o PostgreSQL validar.
-    // -------------------------------------------------------------
-    
-    // Por enquanto, aceita qualquer coisa e libera a tela:
     this.isLoggedIn = true;
+    this.iniciarLeituraDoSensor(); // Assim que entra, começa a ler do banco
   }
 
   fazerLogout() {
     this.isLoggedIn = false;
-    this.resetSystem(); // Garante que volta ao normal ao deslogar
+    if (this.intervalId) {
+      clearInterval(this.intervalId); // Pára as requisições se o utilizador sair
+    }
   }
 
-  // --- LÓGICA DE SIMULAÇÃO (APRESENTAÇÃO) ---
-  simulateLeak() {
-    this.sensorData.gas_level_percentage = 2.1;
-    this.sensorData.status = 'Perigo';
+  // --- LÓGICA DE LIGAÇÃO AO BACKEND (PYTHON) ---
+  iniciarLeituraDoSensor() {
+    this.buscarDadosNoBanco(); // Lê imediatamente a primeira vez
+    
+    // Fica a ler o banco de dados a cada 2 segundos
+    this.intervalId = setInterval(() => {
+      this.buscarDadosNoBanco();
+    }, 2000); 
   }
 
-  resetSystem() {
-    this.sensorData.gas_level_percentage = 0.2;
-    this.sensorData.status = 'Seguro';
+  buscarDadosNoBanco() {
+    // Faz o pedido GET ao Python
+    this.http.get('http://127.0.0.1:8000/api/status').subscribe({
+      next: (dadosReais) => {
+        this.sensorData = dadosReais; // Atualiza o ecrã com os dados do PostgreSQL
+      },
+      error: (erro) => {
+        console.error('Erro ao buscar dados da API Python:', erro);
+      }
+    });
   }
 
   ngOnDestroy() {
