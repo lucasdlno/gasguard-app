@@ -56,7 +56,7 @@ export class App implements OnInit, OnDestroy {
 
   buscarDadosNoBanco() {
     // Faz o pedido GET ao Python
-    this.http.get('http://127.0.0.1:8000/api/status').subscribe({
+    this.http.get('https://gasguard-backend.onrender.com/api/status').subscribe({
       next: (dadosReais) => {
         this.sensorData = dadosReais; // Atualiza o ecrã com os dados do PostgreSQL
       },
