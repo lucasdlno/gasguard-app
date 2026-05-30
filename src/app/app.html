@@ -1,27 +1,7 @@
-<div *ngIf="!isLoggedIn" class="login-container">
-  <div class="login-box">
-    <h1>GasGuard</h1>
-    <p class="subtitle">Monitoramento Autônomo de GLP</p>
-
-    <div class="input-group">
-      <label>Usuário</label>
-      <input type="text" placeholder="Digite seu usuário ou e-mail">
-    </div>
-
-    <div class="input-group">
-      <label>Senha</label>
-      <input type="password" placeholder="••••••••">
-    </div>
-
-    <button class="btn-login" (click)="fazerLogin()">Entrar no Sistema</button>
-  </div>
-</div>
-
-<div *ngIf="isLoggedIn" class="dashboard-container">
+<div class="dashboard-container">
   <div class="header-bar">
     <h1>GasGuard Dashboard</h1>
-    <button class="btn-logout" (click)="fazerLogout()">Sair</button>
-  </div>
+    </div>
   
   <div class="device-card" 
        [ngClass]="{'bg-safe': sensorData.status === 'Seguro', 'bg-danger': sensorData.status === 'Perigo'}">
