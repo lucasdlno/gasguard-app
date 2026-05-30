@@ -55,13 +55,28 @@ export class App implements OnInit, OnDestroy {
   }
 
   buscarDadosNoBanco() {
-    // Faz o pedido GET ao Python
-    this.http.get('https://gasguard-backend.onrender.com/api/status').subscribe({
-      next: (dadosReais) => {
-        this.sensorData = dadosReais; // Atualiza o ecrã com os dados do PostgreSQL
+    this.http.get<any>('https://gasguard-backend.onrender.com/api/status').subscribe({
+      next: (resposta) => {
+        // 1. Se a API estiver a enviar um histórico completo (uma lista), pegamos sempre a última leitura
+        let dados = Array.isArray(resposta) ? resposta[resposta.length - 1] : resposta;
+
+        // 2. Se o banco estiver vazio, não fazemos nada para não quebrar o site
+        if (!dados) return;
+
+        // 3. Traduzimos os dados do ESP32 para a nossa tela
+        this.sensorData.device_name = dados.id_dispositivo; 
+        this.sensorData.gas_level_percentage = dados.nivel_gas;
+
+        // 4. Lógica de Alerta: Se o gás passar de 25%, a tela fica vermelha!
+        // (Você pode ajustar esse número para bater com a sensibilidade do seu sensor MQ-2)
+        if (dados.nivel_gas >= 25) {
+          this.sensorData.status = 'Perigo';
+        } else {
+          this.sensorData.status = 'Seguro';
+        }
       },
       error: (erro) => {
-        console.error('Erro ao buscar dados da API Python:', erro);
+        console.error('Erro de conexão com o Render:', erro);
       }
     });
   }
