@@ -10,8 +10,6 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./app.css']
 })
 export class App implements OnInit, OnDestroy {
-  // --- DADOS DO DASHBOARD ---
-  // Começa com valores a zero até o Python enviar os dados reais
   sensorData: any = { 
     device_name: 'A carregar...', 
     gas_level_percentage: 0, 
@@ -21,19 +19,13 @@ export class App implements OnInit, OnDestroy {
 
   constructor(private http: HttpClient) {}
 
-  // ==========================================
-  // INÍCIO AUTOMÁTICO
-  // ==========================================
   ngOnInit() {
-    // Como tiramos o login, a leitura começa assim que o site abre!
     this.iniciarLeituraDoSensor();
   }
 
-  // --- LÓGICA DE LIGAÇÃO AO BACKEND (PYTHON) ---
   iniciarLeituraDoSensor() {
-    this.buscarDadosNoBanco(); // Lê imediatamente a primeira vez
+    this.buscarDadosNoBanco(); 
     
-    // Fica a ler o banco de dados a cada 2 segundos
     this.intervalId = setInterval(() => {
       this.buscarDadosNoBanco();
     }, 2000); 
@@ -42,12 +34,19 @@ export class App implements OnInit, OnDestroy {
   buscarDadosNoBanco() {
     this.http.get<any>('https://gasguard-backend.onrender.com/api/status').subscribe({
       next: (resposta) => {
-        // Pega a resposta correta (seja um item solto ou o último da lista)
+        // 1. O ESPIÃO VOLTOU! Vamos ver tudo o que chega.
+        console.log("DADOS RECEBIDOS DO RENDER:", resposta);
+
+        // 2. Garante que pega a última leitura se for uma lista
         let dados = Array.isArray(resposta) ? resposta[resposta.length - 1] : resposta;
 
-        if (!dados) return;
+        // 3. Se por algum motivo vier vazio, o espião avisa!
+        if (!dados) {
+          console.log("Aviso: O banco não retornou dados válidos.");
+          return; 
+        }
 
-        // O SEGREDO: Recriar o objeto inteiro de uma vez para a tela atualizar na hora!
+        // 4. ATUALIZAÇÃO DA TELA: Recriando o objeto inteiro para o Angular acordar
         this.sensorData = {
           device_name: dados.device_name,
           gas_level_percentage: dados.gas_level_percentage,
