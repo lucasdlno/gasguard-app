@@ -42,12 +42,21 @@ export class App implements OnInit, OnDestroy {
   buscarDadosNoBanco() {
     this.http.get<any>('https://gasguard-backend.onrender.com/api/status').subscribe({
       next: (resposta) => {
-        if (!resposta) return;
+        // O ESPIÃO: Isso vai imprimir no F12 exatamente o que chegou do banco!
+        console.log("DADOS RECEBIDOS DO RENDER:", resposta);
 
-        // Pegando exatamente as chaves que o Python está enviando
-        this.sensorData.device_name = resposta.device_name; 
-        this.sensorData.gas_level_percentage = resposta.gas_level_percentage;
-        this.sensorData.status = resposta.status;
+        // Se o Python mandar uma lista, pegamos a última leitura. Se for um item só, usamos ele mesmo.
+        let dados = Array.isArray(resposta) ? resposta[resposta.length - 1] : resposta;
+
+        if (!dados) {
+          console.log("O banco de dados está vazio no momento.");
+          return;
+        }
+
+        // Atualizando a tela com as variáveis corretas
+        this.sensorData.device_name = dados.device_name; 
+        this.sensorData.gas_level_percentage = dados.gas_level_percentage;
+        this.sensorData.status = dados.status;
       },
       error: (erro) => {
         console.error('Erro de conexão com o Render:', erro);
