@@ -31,7 +31,7 @@ export class App implements OnInit, OnDestroy {
     
     this.intervalId = setInterval(() => {
       this.buscarDadosNoBanco();
-    }, 2000); 
+    }, 1000); 
   }
 
   buscarDadosNoBanco() {
