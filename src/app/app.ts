@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core'; // <-- Importamos o despertador aqui!
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
@@ -46,11 +46,22 @@ export class App implements OnInit, OnDestroy {
           return; 
         }
 
-        // Atualizamos os dados na memória...
+        // ==========================================
+        // A CORREÇÃO DA MATEMÁTICA ENTRA AQUI
+        // ==========================================
+        
+        // 1. Pega o valor que chegou da nuvem
+        const valorCru = dados.gas_level_percentage !== undefined ? dados.gas_level_percentage : dados.nivel_gas;
+        
+        // 2. Força o JavaScript a tratar o valor estritamente como um Número matemático
+        const nivelGas = Number(valorCru);
+        const nomeAparelho = dados.device_name || dados.id_dispositivo || 'apt_42';
+
+        // 3. Atualizamos os dados na memória (O Angular decide sozinho se é Perigo ou Seguro)
         this.sensorData = {
-          device_name: dados.device_name,
-          gas_level_percentage: dados.gas_level_percentage,
-          status: dados.status
+          device_name: nomeAparelho,
+          gas_level_percentage: nivelGas,
+          status: nivelGas >= 25 ? 'Perigo' : 'Seguro'
         };
 
         // ACORDA O ANGULAR À FORÇA! Isso obriga a tela HTML a piscar e mostrar os dados novos na mesma hora.
